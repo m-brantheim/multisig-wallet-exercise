@@ -5,6 +5,7 @@ contract MultiSignatureWallet {
     event Deposit(address indexed sender, uint value);
     event Submission(uint indexed transactionId);
     event Confirmation(address indexed sender, uint indexed transactionId);
+    event RevokeConfirmation(address indexed sender, uint indexed transactionId);
     event Execution(uint indexed transactionId);
     event ExecutionFailure(uint indexed transactionId);
 
@@ -78,7 +79,13 @@ contract MultiSignatureWallet {
 
     /// @dev Allows an owner to revoke a confirmation for a transaction.
     /// @param transactionId Transaction ID.
-    function revokeConfirmation(uint transactionId) public {}
+    function revokeConfirmation(uint transactionId) public {
+        require(isOwner[msg.sender]);
+        require(transactions[transactionId].destination != address(0));
+        require(confirmations[transactionId][msg.sender] == true);
+        confirmations[transactionId][msg.sender] = false;
+        emit RevokeConfirmation(msg.sender, transactionId);
+    }
 
     /// @dev Allows anyone to execute a confirmed transaction.
     /// @param transactionId Transaction ID.
